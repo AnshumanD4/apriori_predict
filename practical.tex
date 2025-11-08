@@ -1,0 +1,115 @@
+\documentclass[a4paper,12pt]{report}
+
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{geometry}
+\geometry{margin=1in}
+
+\lstset{
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue}\bfseries,
+    commentstyle=\color{green!50!black},
+    stringstyle=\color{orange},
+    showstringspaces=false,
+    frame=single,
+    breaklines=true
+}
+
+\begin{document}
+
+\begin{center}
+    \Huge \textbf{DBMS Practical File} \\
+    \vspace{1cm}
+    \Large Practical – Implementation of Strict 2PL and Rigorous 2PL \\
+    \vspace{3cm}
+    \textbf{Name: Anshuman Diwakar} \\
+    \textbf{Course: B.Tech (CSE)} \\
+    \textbf{Subject: Database Management Systems} \\
+    \textbf{Instructor: Karan Gupta} \\
+    \textbf{Date: September 9, 2025} \\
+\end{center}
+
+\newpage
+
+\section*{Aim}
+To demonstrate \textbf{Strict 2PL} and \textbf{Rigorous 2PL} protocols using SQL transactions.
+
+\section*{Theory}
+\begin{itemize}
+    \item \textbf{Strict 2PL}:
+    \begin{itemize}
+        \item Shared (S) locks may be released after use.
+        \item Exclusive (X) locks are held until commit/abort.
+        \item Ensures conflict-serializable and cascadeless schedules.
+    \end{itemize}
+
+    \item \textbf{Rigorous 2PL}:
+    \begin{itemize}
+        \item Both shared and exclusive locks are held until commit.
+        \item Ensures conflict-serializable, cascadeless, and strict schedules.
+    \end{itemize}
+\end{itemize}
+
+\section*{Database Setup}
+\begin{lstlisting}[language=SQL]
+CREATE TABLE Accounts (
+    acc_no INT PRIMARY KEY,
+    balance INT
+);
+
+INSERT INTO Accounts VALUES (1, 1000);
+INSERT INTO Accounts VALUES (2, 2000);
+\end{lstlisting}
+
+\section*{Transaction 1 (T1)}
+\begin{lstlisting}[language=SQL]
+BEGIN TRANSACTION;
+
+-- T1 reads Account 1
+SELECT balance FROM Accounts WHERE acc_no = 1;
+
+-- T1 updates Account 2
+UPDATE Accounts SET balance = balance + 500 WHERE acc_no = 2;
+
+-- Commit releases locks
+COMMIT;
+\end{lstlisting}
+
+\section*{Transaction 2 (T2)}
+\begin{lstlisting}[language=SQL]
+BEGIN TRANSACTION;
+
+-- T2 updates Account 1
+UPDATE Accounts SET balance = balance - 200 WHERE acc_no = 1;
+
+-- T2 reads Account 2
+SELECT balance FROM Accounts WHERE acc_no = 2;
+
+COMMIT;
+\end{lstlisting}
+
+\section*{Schedule under Strict 2PL}
+\begin{verbatim}
+T1: S-lock(A1), read(A1), release S-lock(A1)
+T2: X-lock(A1), write(A1) (waits until T1 releases)
+T1: X-lock(A2), write(A2), commit (releases X-lock)
+T2: read(A2), commit
+\end{verbatim}
+
+\section*{Schedule under Rigorous 2PL}
+\begin{verbatim}
+T1: S-lock(A1), read(A1) (lock not released)
+T2: waits for X-lock(A1)
+T1: X-lock(A2), write(A2)
+T1: commit (all locks released)
+T2: X-lock(A1), write(A1), S-lock(A2), read(A2), commit
+\end{verbatim}
+
+\section*{Conclusion}
+\begin{itemize}
+    \item \textbf{Strict 2PL} holds exclusive locks till commit but may release shared locks earlier.
+    \item \textbf{Rigorous 2PL} holds \emph{all locks} (S and X) till commit.
+    \item Rigorous 2PL gives the highest degree of isolation and avoids cascading aborts completely.
+\end{itemize}
+
+\end{document}

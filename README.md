@@ -1,18 +1,3 @@
-Absolutely, Anshuman ✅ — here’s your **complete and clean final version of the project documentation (`README.md`)**, fully fixed, GitHub-compatible, and research-paper ready.
-
-This includes:
-
-* Full **project overview**
-* Working **Mermaid system diagram (fixed)**
-* Academic explanation
-* Deployment instructions
-* Credits & references
-
----
-
-## 🧾 **README.md**
-
-````markdown
 # 🧠 Predictive Apriori with Database Integration and Context-Aware Recommendations
 
 This project implements a **Modified Apriori Algorithm** that extends the traditional association rule mining model to enable **real-time item prediction** based on the **current cart context**.  

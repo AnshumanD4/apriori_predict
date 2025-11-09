@@ -1,12 +1,8 @@
-# --- Modified Apriori with Database Integration & Context-Aware Prediction ---
-# Author: Anshuman Diwakar
-
 import pandas as pd
 import sqlite3
 import streamlit as st
 from mlxtend.frequent_patterns import apriori, association_rules
 
-# ----------------- DATABASE SETUP -----------------
 DB_FILE = "apriori_rules.db"
 
 def init_db():
@@ -24,7 +20,6 @@ def init_db():
     conn.commit()
     conn.close()
 
-# ----------------- SAVE RULES -----------------
 def save_rules_to_db(rules_df):
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
@@ -43,7 +38,6 @@ def save_rules_to_db(rules_df):
     conn.commit()
     conn.close()
 
-# ----------------- QUERY RULES -----------------
 def query_rules_from_db(cart_items):
     conn = sqlite3.connect(DB_FILE)
     query = "SELECT * FROM AssociationRules"
@@ -61,10 +55,9 @@ def query_rules_from_db(cart_items):
         results_df = results_df.sort_values(by='confidence', ascending=False)
     return results_df
 
-# ----------------- APRIORI MINING -----------------
 def run_apriori(dataset_path, min_support=0.01, min_confidence=0.2):
     df = pd.read_csv(dataset_path)
-    # Transaction grouping
+
     basket = (df.groupby(['Member_number', 'itemDescription'])['itemDescription']
                 .count().unstack().reset_index().fillna(0).set_index('Member_number'))
     basket = basket.applymap(lambda x: 1 if x > 0 else 0)
@@ -74,7 +67,6 @@ def run_apriori(dataset_path, min_support=0.01, min_confidence=0.2):
     save_rules_to_db(rules)
     return frequent_itemsets, rules
 
-# ----------------- STREAMLIT UI -----------------
 st.title("Modified Apriori with Context-Aware Prediction")
 st.markdown("### A Database-Integrated Model for Predicting Next Likely Items")
 
@@ -88,7 +80,7 @@ if st.button("Run Apriori & Store Rules"):
     st.dataframe(rules.head(10))
 
 st.markdown("---")
-st.header("🔍 Predict Next Item from Current Cart")
+st.header("Predict Next Item from Current Cart")
 
 cart_input = st.text_input("Enter items currently in cart (comma-separated)", "whole milk, yogurt")
 if st.button("Predict Next Items"):
@@ -97,7 +89,7 @@ if st.button("Predict Next Items"):
     results_df = query_rules_from_db(current_cart)
 
     if not results_df.empty:
-        st.success("✅ Predicted Next Items:")
+        st.success(" Predicted Next Items:")
         st.dataframe(results_df[['consequents', 'confidence', 'lift']].head(10))
     else:
         st.warning("No strong rule found for this cart context.")
